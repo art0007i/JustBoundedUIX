@@ -20,7 +20,7 @@ namespace JustBoundedUIX
         public override string Author => "art0007i";
         public override string Link => "https://github.com/art0007i/JustBoundedUIX";
         public override string Name => "JustBoundedUIX";
-        public override string Version => "1.0.0";
+        public override string Version => "1.0.1";
 
         public override void OnEngineInit()
         {
@@ -94,17 +94,11 @@ namespace JustBoundedUIX
 
             private static readonly MethodInfo computeBoundingBoxMethod = typeof(BoundsHelper).GetMethod("ComputeBoundingBox", AccessTools.allDeclared);
 
-            private static readonly MethodInfo getGlobalPositionMethod = typeof(Slot).GetProperty(nameof(Slot.GlobalPosition), AccessTools.allDeclared).GetMethod;
-
-            private static readonly Type RotationGizmoType = typeof(RotationGizmo);
-            private static readonly MethodInfo uixBoundCenterMethod = typeof(SlotGizmoPatches).GetMethod(nameof(UIXBoundCenter), AccessTools.allDeclared);
-
             private static BoundingBox BoundUIX(BoundingBox bounds, Slot target, Slot space)
             {
                 if (target.GetComponent<RectTransform>() is RectTransform rt && rt.Canvas != null
                     && rt.Slot != rt.Canvas.Slot)
                 {
-
                     var area = rt.ComputeGlobalComputeRect();
                     bounds.Encapsulate(space.GlobalPointToLocal(rt.Canvas.Slot.LocalPointToGlobal(area.ExtentMin / rt.Canvas.UnitScale)));
                     bounds.Encapsulate(space.GlobalPointToLocal(rt.Canvas.Slot.LocalPointToGlobal(area.ExtentMax / rt.Canvas.UnitScale)));
@@ -114,47 +108,18 @@ namespace JustBoundedUIX
 
             [HarmonyTranspiler]
             [HarmonyPatch("OnCommonUpdate")]
-            private static IEnumerable<CodeInstruction> OnCommonUpdateTranspiler(IEnumerable<CodeInstruction> codeInstructions)
+            private static IEnumerable<CodeInstruction> OnCommonUpdateTranspiler(IEnumerable<CodeInstruction> codes)
             {
-                var instructions = codeInstructions.ToList();
-
-                var globalPositionIndex = instructions.FindIndex(instruction => instruction.Calls(getGlobalPositionMethod));
-
-                if (globalPositionIndex < 0)
-                    return instructions;
-
-                instructions[globalPositionIndex] = new CodeInstruction(OpCodes.Call, uixBoundCenterMethod);
-
-                var computeIndex = instructions.FindIndex(globalPositionIndex, instruction => instruction.Calls(computeBoundingBoxMethod));
-
-                if (computeIndex < 0)
-                    return instructions;
-
-                instructions.Insert(computeIndex + 1, instructions[computeIndex - 5]);
-                instructions.Insert(computeIndex + 2, instructions[computeIndex - 3]);
-                instructions.Insert(computeIndex + 3, new CodeInstruction(OpCodes.Call, boundUIXMethod));
-
-                return instructions;
-            }
-
-            [HarmonyPostfix]
-            [HarmonyPatch("RegenerateButtons")]
-            private static void RegenerateButtonsPostfix(SlotGizmo __instance, SyncRef<Slot> ____buttonsSlot)
-            {
-                var moveableRect = JustBoundedUIX.GetRectTransform(__instance.TargetSlot) == null;
-
-                if (____buttonsSlot.Target.GetComponentInChildren<SlotGizmoButton>(button => ((SyncRef<Worker>)button.TryGetField("_worker")).Target?.GetType() == RotationGizmoType) is SlotGizmoButton sgb)
-                    sgb.Slot.ActiveSelf = !moveableRect;
-            }
-            private static float3 UIXBoundCenter(Slot target)
-            {
-                var rt = JustBoundedUIX.GetRectTransform(target);
-                if (rt == null)
-                    return target.GlobalPosition;
-
-                var bounds = JustBoundedUIX.GetBoundingBox(rt);
-
-                return bounds.Center - JustBoundedUIX.GizmoOffset * rt.Canvas.Slot.Forward;
+                foreach (var code in codes)
+                {
+                    yield return code;
+                    if (code.Calls(computeBoundingBoxMethod))
+                    {
+                        yield return new CodeInstruction(OpCodes.Ldloc_0);
+                        yield return new CodeInstruction(OpCodes.Ldloc_3);
+                        yield return new CodeInstruction(OpCodes.Call, boundUIXMethod);
+                    }
+                }
             }
         }
 
