@@ -24,7 +24,7 @@ namespace JustBoundedUIX
 
         public override void OnEngineInit()
         {
-            Harmony harmony = new Harmony($"me.art0007i.JustBoundedUIX");
+            Harmony harmony = new Harmony("me.art0007i.JustBoundedUIX");
             harmony.PatchAll();
         }
 
