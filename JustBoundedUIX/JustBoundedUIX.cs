@@ -4,23 +4,23 @@ using System.Collections.Generic;
 using System.Reflection.Emit;
 using System.Reflection;
 using System.Text;
-using BaseX;
+using Elements.Core;
 using FrooxEngine;
 using FrooxEngine.UIX;
 using HarmonyLib;
-using NeosModLoader;
+using ResoniteModLoader;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace JustBoundedUIX
 {
-    public class JustBoundedUIX : NeosMod
+    public class JustBoundedUIX : ResoniteMod
     {
         public const float GizmoOffset = .02f;
         public override string Author => "art0007i";
         public override string Link => "https://github.com/art0007i/JustBoundedUIX";
         public override string Name => "JustBoundedUIX";
-        public override string Version => "1.0.1";
+        public override string Version => "2.0.0";
 
         public override void OnEngineInit()
         {
@@ -144,7 +144,7 @@ namespace JustBoundedUIX
                             var pos = rt.Canvas.Slot.LocalPointToGlobal(new float3(area.Center / rt.Canvas.UnitScale));
                             var size = rt.Canvas.Slot.LocalScaleToGlobal(new float3(hori, vert) / rt.Canvas.UnitScale);
 
-                            rt.World.Debug.Box(pos, size, color.Blue.SetA(0.25f), rt.Canvas.Slot.GlobalRotation);
+                            rt.World.Debug.Box(pos, size, colorX.Blue.SetA(0.25f), rt.Canvas.Slot.GlobalRotation);
                             await default(NextUpdate);
                         }
                     });
