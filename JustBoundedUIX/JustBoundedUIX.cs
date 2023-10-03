@@ -20,7 +20,7 @@ namespace JustBoundedUIX
         public override string Author => "art0007i";
         public override string Link => "https://github.com/art0007i/JustBoundedUIX";
         public override string Name => "JustBoundedUIX";
-        public override string Version => "2.0.0";
+        public override string Version => "2.0.1";
 
         public override void OnEngineInit()
         {
@@ -52,13 +52,6 @@ namespace JustBoundedUIX
                 var func = AccessTools.Method(typeof(SceneInspector), "OnInsertParentPressed");
                 yield return func;
                 func = AccessTools.Method(typeof(SceneInspector), "OnAddChildPressed");
-                yield return func;
-                func = AccessTools.Method(typeof(SlotPositioning), nameof(SlotPositioning.CreatePivotAtCenter),
-                    new Type[] {
-                        typeof(Slot),
-                        typeof(BoundingBox).MakeByRefType(),
-                        typeof(bool)
-                });
                 yield return func;
             }
 
